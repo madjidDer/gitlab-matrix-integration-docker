@@ -1,0 +1,82 @@
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: synapse
+    volumes:
+      - ./synapse/data:/data
+      - ./hookshot/config/registration.yml:/data/hookshot-registration.yml:ro
+    environment:
+      - SYNAPSE_SERVER_NAME=localhost
+      - SYNAPSE_REPORT_STATS=no
+    ports:
+      - "8008:8008"
+    networks:
+      - hooknet
+      - gitlabnet
+
+  element:
+    image: vectorim/element-web
+    container_name: element
+    ports:
+      - "8080:80"
+    networks:
+      - hooknet
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    hostname: gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost:8090'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        nginx['listen_port'] = 80
+        nginx['redirect_http_to_https'] = false
+        postgresql['shared_buffers'] = "256MB"
+        sidekiq['max_concurrency'] = 25
+    ports:
+      - "8090:80"
+      - "2222:22"
+    volumes:
+      - ./gitlab/config:/etc/gitlab
+      - ./gitlab/logs:/var/log/gitlab
+      - ./gitlab/data:/var/opt/gitlab
+    shm_size: '1g'
+    networks:
+      - gitlabnet
+      - bridgehookgit
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    volumes:
+      - ./gitlab-runner/config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlabnet
+    depends_on:
+      - gitlab
+
+  hookshot:
+    image: halfshot/matrix-hookshot
+    container_name: hookshot
+    ports:
+      - "9993:9993"
+      - "9000:9000"
+      - "9002:9002"
+    working_dir: /data
+    volumes:
+      - ./hookshot/config/config.yml:/data/config.yml
+      - ./hookshot/config/registration.yml:/data/registration.yml
+      - ./hookshot/config/passkey.pem:/data/passkey.pem
+    networks:
+      - hooknet
+      - bridgehookgit
+    depends_on:
+      - synapse
+      - gitlab
+
+networks:
+  hooknet:
+  gitlabnet:
+  bridgehookgit:

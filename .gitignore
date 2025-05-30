@@ -1,0 +1,12 @@
+# Ignorer les répertoires générés
+gitlab-runner/
+gitlab/
+
+# Ignorer les fichiers de configuration et de données sensibles de Synapse
+synapse/data/homeserver.db
+synapse/data/homeserver.yaml
+synapse/data/localhost.log.config
+synapse/data/localhost.signing.key
+
+# Ignorer les fichiers sensibles de Hookshot
+hookshot/config/passkey.pem
