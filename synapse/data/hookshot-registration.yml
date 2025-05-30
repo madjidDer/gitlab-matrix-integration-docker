@@ -1,0 +1,13 @@
+id: hookshot
+url: http://hookshot:9993
+as_token: myhookshotapptoken
+hs_token: myhookshottoken
+sender_localpart: hookshot
+rate_limited: false
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@hookshot:localhost'
+  aliases: []
+  rooms: []
+protocols: []

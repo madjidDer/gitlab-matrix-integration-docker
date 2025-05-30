@@ -1,0 +1,36 @@
+registration:
+  file: /data/registration.yml
+
+bridge:
+  domain: localhost
+  url: http://synapse:8008
+  registration: /data/registration.yml
+  port: 9993
+  bindAddress: 0.0.0.0
+  homeserverToken: "myhookshottoken"
+  appserviceToken: "myhookshotapptoken"
+  senderLocalpart: "hookshot"
+  enableBotCommands: true
+
+listeners:
+  - port: 9000
+    bindAddress: 0.0.0.0
+    resources:
+      - webhooks
+
+permissions:
+  - actor: "*"
+    services:
+      - service: "*"
+        level: admin
+
+gitlab:
+  instances:
+    gitlab:
+      url: http://gitlab/
+  webhook:
+    secret: my-secret
+    publicUrl: http://hookshot:9000/
+
+userTokenStore:
+  keyFile: /data/passkey.pem
